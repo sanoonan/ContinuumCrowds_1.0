@@ -1,0 +1,43 @@
+#version 400
+
+layout(location = 0) in vec3 vertex_position;
+layout(location = 1) in vec3 vertex_normal;
+
+
+
+
+
+uniform mat4 view;
+uniform mat4 proj;
+uniform mat4 model;
+
+uniform vec3 max_colour;
+uniform vec3 min_colour;
+
+uniform float max_value;
+uniform float min_value;
+
+uniform float value;
+
+out vec3 colour;
+
+
+void main()
+{
+	if(value >= max_value)
+		colour = max_colour;
+	else if (value <= min_value)
+		colour = min_colour;
+	else
+	{
+		float mix_factor = (value - min_value) / (max_value - min_value);
+		colour = mix(min_colour, max_colour, mix_factor);
+	}
+
+
+	// Convert position to clip coordinates and pass along
+	gl_Position = proj * view * model * vec4(vertex_position, 1.0);
+}
+
+
+  

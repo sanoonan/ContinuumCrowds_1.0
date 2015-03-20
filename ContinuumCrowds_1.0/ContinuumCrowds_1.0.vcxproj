@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Files\Camera.h" />
+    <ClInclude Include="Files\Cell.h" />
+    <ClInclude Include="Files\CellFace.h" />
+    <ClInclude Include="Files\DensityField.h" />
+    <ClInclude Include="Files\Grid.h" />
+    <ClInclude Include="Files\Group.h" />
+    <ClInclude Include="Files\Person.h" />
+    <ClInclude Include="Files\PopulationManager.h" />
+    <ClInclude Include="Files\PotentialField.h" />
+    <ClInclude Include="Files\Shaders.h" />
+    <ClInclude Include="Files\SpeedField.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Files\Camera.cpp" />
+    <ClCompile Include="Files\Cell.cpp" />
+    <ClCompile Include="Files\CellFace.cpp" />
+    <ClCompile Include="Files\DensityField.cpp" />
+    <ClCompile Include="Files\Grid.cpp" />
+    <ClCompile Include="Files\Group.cpp" />
+    <ClCompile Include="Files\main.cpp" />
+    <ClCompile Include="Files\Person.cpp" />
+    <ClCompile Include="Files\PopulationManager.cpp" />
+    <ClCompile Include="Files\PotentialField.cpp" />
+    <ClCompile Include="Files\Shaders.cpp" />
+    <ClCompile Include="Files\SpeedField.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Shaders\minMaxFS.txt" />
+    <Text Include="..\Shaders\minMaxVS.txt" />
+    <Text Include="..\Shaders\lineFS.txt" />
+    <Text Include="..\Shaders\lineVS.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{67D551F0-7B4B-4B55-8F99-0907D7669CF3}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ContinuumCrowds_10</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glm-0.9.5.4\glm;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glm-0.9.5.4\glm;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glew-1.10.0\include;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\freeglut\include;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\assimp\include;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\AntTweakBar\AntTweakBar\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glew-1.10.0\lib\Release\Win32;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\freeglut\lib;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\assimp\lib\Release;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\AntTweakBar\AntTweakBar\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glew-1.10.0\include;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\freeglut\include;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\assimp\include;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\AntTweakBar\AntTweakBar\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glew-1.10.0\lib\Release\Win32;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\freeglut\lib;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\assimp\lib\Release;C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\AntTweakBar\AntTweakBar\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
