@@ -32,19 +32,15 @@ bool Grid :: checkExists(glm::vec2 cell_pos)
 	return true;
 }
 
-std::vector<glm::vec2> Grid :: getNeighbours(glm::vec2 cell)
+void Grid :: getNeighbours(glm::vec2 cell, glm::vec2 *cells)
 {
 	int x = cell.x;
 	int y = cell.y;
-
-	std::vector<glm::vec2> cells(4);
 
 	cells[0] = glm::vec2(x+1, y);
 	cells[1] = glm::vec2(x, y+1);
 	cells[2] = glm::vec2(x-1, y);
 	cells[3] = glm::vec2(x, y-1);
-
-	return cells;
 }
 
 void Grid :: checkMinMax(float value, float &min_value, float &max_value)
@@ -68,6 +64,33 @@ void Grid :: drawOutline(float scale, GLuint spID)
 	glutWireCube(scale);
 }
 
+glm::vec2 Grid :: findClosestCellPos(glm::vec2 cell_pos)
+{
+	std::vector<glm::vec2> cells_pos(4);
+
+	cells_pos[0] = glm::vec2(glm::floor(cell_pos.x), glm::ceil(cell_pos.y));
+	cells_pos[1] = glm::vec2(glm::ceil(cell_pos.x), glm::ceil(cell_pos.y));
+	cells_pos[2] = glm::vec2(glm::ceil(cell_pos.x), glm::floor(cell_pos.y));
+	cells_pos[3] = glm::vec2(glm::floor(cell_pos.x), glm::floor(cell_pos.y));
+
+	float min_dist = 999;
+	float dist;
+	glm::vec2 min_cell_pos(-5.0f);
+
+	for(int i=1; i<4; i++)
+	{
+		if(checkExists(cells_pos[i]))
+		{
+			dist = glm::distance(cells_pos[i], cell_pos);
+			if(dist < min_dist)
+				min_cell_pos = cells_pos[i];
+		}
+	}
+
+
+	return min_cell_pos;
+}
+
 #pragma endregion
 
 #pragma region SHARED
@@ -85,7 +108,7 @@ SharedGrid :: SharedGrid(int width, int height) : Grid(width, height)
 void SharedGrid :: setupGridCells()
 {
 	m_cells.resize(m_width);
-	for(int i=0; i<m_height; i++)
+	for(int i=0; i<m_width; i++)
 	{
 		m_cells[i].resize(m_height);
 		for(int j=0; j<m_height; j++)
@@ -159,7 +182,7 @@ void SharedGrid :: setHeightGrads()
 	SharedCell *curr_cell;
 	SharedCellFace *curr_face;
 	bool left, right, top, bot;
-	std::vector<glm::vec2> neighbours;
+	glm::vec2 neighbours[4];
 	SharedCell *neighbour_cell;
 	glm::vec2 cell_pos;
 	float height_grad, curr_height, neighbour_height;
@@ -172,7 +195,7 @@ void SharedGrid :: setHeightGrads()
 			curr_cell = &m_cells[i][j];
 			cell_pos = glm::vec2(i, j); 
 			curr_height = curr_cell->m_height;
-			neighbours = getNeighbours(cell_pos);
+			getNeighbours(cell_pos, neighbours);
 
 			tot_height_grad = glm::vec2(0.0f);
 
@@ -214,7 +237,7 @@ void SharedGrid :: makeMiddleMountain(int max_height, float radius)
 
 	float max_dist = glm::length(glm::vec2(x_spread, y_spread));
 
-	int x_mid = m_width/2;
+	int x_mid = m_width/2 - 1;
 	int y_mid = m_height/2;
 
 	glm::vec2 mid(x_mid, y_mid);
@@ -252,7 +275,7 @@ GroupGrid :: GroupGrid(int width, int height) : Grid(width, height)
 void GroupGrid :: setupGridCells()
 {
 	m_cells.resize(m_width);
-	for(int i=0; i<m_height; i++)
+	for(int i=0; i<m_width; i++)
 	{
 		m_cells[i].resize(m_height);
 		for(int j=0; j<m_height; j++)

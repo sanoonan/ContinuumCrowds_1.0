@@ -59,28 +59,38 @@ bool is_paused = false;
 float fps = 0.0f;
 
 
+
+
 Shaders line_shader("Line", VS_LINE, FS_LINE);
 Shaders density_shader("Density", VS_MINMAX, FS_MINMAX);
 Shaders height_shader("Height", VS_MINMAX, FS_MINMAX);
 Shaders potential_shader("Potential", VS_MINMAX, FS_MINMAX);
 
 PopulationManager popManager;
-SharedGrid mainGrid(10, 10);
-Group groupA(100);
+
+//VORTEX SCENARTIO
+SharedGrid mainGrid(20, 20);
+Group groupA(10, glm::vec3(1.0f, 0.5f, 0.0f));
+Group groupB(10, glm::vec3(0.0f, 1.0f, 1.0f));
+Group groupC(10, glm::vec3(1.0f, 0.0f, 0.0f));
+Group groupD(10, glm::vec3(1.0f, 1.0f, 0.0f));
+
 DensityField densityField;
 SpeedField speedField;
 PotentialField potentialField;
 
 
 
-float draw_scale = 0.5f;
+
+
+float draw_scale = 0.7f;
 
 bool draw_densities = false;
 bool draw_heights = true;
 bool draw_potentials = false;
 
-bool draw_teapots = true;
-bool are_moving = false;
+bool draw_teapots = false;
+bool are_moving = true;
 
 #pragma region DENSITY SHADER STUFF
 float min_density, max_density;
@@ -103,8 +113,8 @@ void updateDensityShaderValues()
 
 void initDensityShaderValues()
 {
-	max_density = 3.0f;
-	min_density = 0.0f;
+	max_density = 8.0f;
+	min_density = 1.0f;
 
 	max_density_col = glm::vec3(1.0f, 0.0f, 0.0f);
 	min_density_col = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -180,13 +190,29 @@ void initPotentialShaderValues()
 #pragma endregion
 
 
+void debugPotentials()
+{
+	float potentials[4][4];
+
+	for(int i=0; i<4; i++)
+		for(int j=0; j<4; j++)
+		{
+			potentials[j][i] = groupA.m_grid.m_cells[i][j].m_potential;
+		}
+
+	cout << "lol";
+}
+
 #pragma region TWEAK BAR STUFF
 
 
 
 void TW_CALL reset(void *)
 {
-	popManager.assignRandomLocs();
+//	popManager.assignRandomLocs();
+
+	groupA.assignRandomLeftLoc();
+	groupB.assignRandomRightLoc();
 }
 
 
@@ -235,10 +261,10 @@ void init_tweak()
 
 	TwAddVarRW(bar, "Draw Direction?", TW_TYPE_BOOLCPP, &draw_teapots, "");
 	TwAddButton(bar, "Reset", reset, NULL, "");
-	TwAddVarRW(bar, "Run?", TW_TYPE_BOOLCPP, &are_moving, "");
+//	TwAddVarRW(bar, "Run?", TW_TYPE_BOOLCPP, &are_moving, "");
 
 	
-//	TwAddButton(bar, "Pause", pause, NULL, "");
+	TwAddButton(bar, "Pause", pause, NULL, "");
 
 	TwAddButton(bar, "Show Potentials", drawPotential, NULL, "");
 	TwAddVarRW(bar, "Max Potential", TW_TYPE_FLOAT, &max_potential, "");
@@ -289,20 +315,65 @@ void init()
 	
 	mainGrid.setupGridCells();
 //	mainGrid.assignRandomHeights(max_height);
-	mainGrid.makeMiddleMountain(max_height, 0.5f);
+//	mainGrid.makeMiddleMountain(max_height, 0.5f);
 
 	popManager.addGroup(groupA);
-	popManager.setupGroupGrids(mainGrid);
-	popManager.assignRandomLocs();
+	popManager.addGroup(groupB);
 
-	groupA.setSpeeds(0.1f, 1.0f);
-	groupA.setRightSideGoal();
+	popManager.addGroup(groupC);
+	popManager.addGroup(groupD);
+
+
+
+
+	popManager.setupGroupGrids(mainGrid);
+//	popManager.assignRandomLocs();
+
+//	groupA.assignRandomLeftLoc();
+//	groupA.assignRandomBottomLeftLoc();
+	groupA.assignRandomTopLeftLoc();
+
+//	groupB.assignRandomRightLoc();
+//	groupB.assignRandomTopRightLoc();
+	groupB.assignRandomBottomRightLoc();
+
+	groupC.assignRandomBottomLeftLoc();
+	groupD.assignRandomTopRightLoc();
+
+
+
+
+
+	groupA.setSpeeds(0.1f, 0.2f);
+	groupB.setSpeeds(0.1f, 0.2f);
+	groupC.setSpeeds(0.1f, 0.2f);
+	groupD.setSpeeds(0.1f, 0.2f);
+
+
+
+
+
+//	groupA.setRightSideGoal();
+	groupA.setBottomRightCornerGoal();
+	
+//	groupB.setLeftSideGoal();
+	groupB.setTopLeftCornerGoal();
+
+
+	groupC.setTopRightCornerGoal();
+	groupD.setBottomLeftCornerGoal();
+
+
+
+
+
 
 	densityField.m_grid = &mainGrid;
 	densityField.popManager = &popManager;
 
 	speedField.shared_grid = &mainGrid;
 	speedField.popManager = &popManager;
+	speedField.assignDensityField(&densityField);
 //	speedField.assignTopoSpeeds();
 
 	potentialField.shared_grid = &mainGrid;
@@ -389,8 +460,9 @@ void updateScene()
 	fps = 1/elapsed_seconds;
 
 	
-
+	densityField.assignMinMax(min_density, max_density);
 	densityField.update();
+
 
 	speedField.update();
 
@@ -398,18 +470,18 @@ void updateScene()
 
 	speedField.assignDirSpeeds();
 
-	if(are_moving)
-	{
-		speedField.assignPeopleVels();
 
-		popManager.move(elapsed_seconds);
-	}
+	speedField.assignPeopleVels();
+
+	popManager.move(elapsed_seconds);
+	
 
 	
 
 	updateDensityShaderValues();
 	updateHeightShaderValues();
 	updatePotentialShaderValues();
+
 
 	glutPostRedisplay();
 }

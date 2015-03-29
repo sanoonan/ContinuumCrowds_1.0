@@ -47,7 +47,6 @@ public:
 	glm::vec2 getNeighbourPos(CellFace face);
 
 	
-	
 
 	virtual void setFaces() = 0;
 };

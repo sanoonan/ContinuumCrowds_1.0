@@ -34,12 +34,14 @@ class Person
 public:
 	
 	glm::vec2 m_position, m_velocity;
-	float m_density_contrib;
+
 
 	void draw(float grid_width, float grid_height, float scale, GLuint spID);
 
 	Person();
 	void assignRandomLoc(int grid_width, int grid_height);
+
+	void assignRandomLoc(int min_width, int max_width, int min_height, int max_height);
 
 	void move(float dt);
 };

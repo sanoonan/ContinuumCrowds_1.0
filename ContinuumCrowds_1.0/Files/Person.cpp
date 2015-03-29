@@ -5,7 +5,7 @@ using namespace std;
 Person :: Person()
 {
 	m_position = m_velocity = glm::vec2(0.0f);
-	m_density_contrib = 1.1f;
+
 }
 
 
@@ -20,6 +20,8 @@ void Person :: draw(float grid_width, float grid_height, float scale, GLuint spI
 	glutSolidSphere(0.1f, 5, 5);
 }
 
+
+
 void Person :: assignRandomLoc(int grid_width, int grid_height)
 {
 	int t = rand();
@@ -32,6 +34,23 @@ void Person :: assignRandomLoc(int grid_width, int grid_height)
 	h /= 1000;
 	h -= 0.5f;
 	
+
+	m_position = glm::vec2(w, h);
+}
+
+void Person :: assignRandomLoc(int min_width, int max_width, int min_height, int max_height)
+{
+	int t = rand();
+
+	float w = (rand()%((max_width - min_width)*1000));
+	w /= 1000;
+	w -= 0.5f;
+	w += min_width;
+
+	float h = (rand()%((max_height - min_height)*1000));
+	h /= 1000;
+	h -= 0.5f;
+	h += min_height;
 
 	m_position = glm::vec2(w, h);
 }

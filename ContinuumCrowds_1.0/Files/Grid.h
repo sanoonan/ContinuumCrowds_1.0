@@ -51,7 +51,10 @@ public:
 	virtual void setupGridCells() = 0;
 
 	bool checkExists(glm::vec2 cell_pos);
-	std::vector <glm::vec2> getNeighbours(glm::vec2 cell);
+
+	glm::vec2 findClosestCellPos(glm::vec2 cell_pos);
+
+	void getNeighbours(glm::vec2 cell, glm::vec2 *cells);
 
 	void checkMinMax(float value, float &min_value, float &max_value);
 

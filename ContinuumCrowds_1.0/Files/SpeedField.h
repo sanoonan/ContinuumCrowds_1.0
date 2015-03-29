@@ -29,6 +29,7 @@
 
 #include "Grid.h"
 #include "PopulationManager.h"
+#include "DensityField.h"
 
 class SpeedField
 {
@@ -36,10 +37,22 @@ public:
 	
 	SharedGrid *shared_grid;
 	PopulationManager *popManager;
+
+	DensityField *densityField;
 	
 	SpeedField();
 
-//	void assignTopoSpeeds();
+	float *min_density, *max_density;
+
+	void assignDensityField(DensityField *df);
+
+	float getTopoSpeed(float fmax, float fmin, float smax, float smin, glm::vec2 grad_height, glm::vec2 offset);
+	float getFlowSpeed(glm::vec2 avg_vel, glm::vec2 offset);
+	float getFlowSpeedCell(glm::vec2 cell_pos, glm::vec2 offset);
+
+	float interpolateSpeed(float ft, float fv, float p, float pmin, float pmax);
+	float interpolateSpeedCell(glm::vec2 cell_pos, glm::vec2 offset, float topo_speed, float flow_speed);
+	
 	void assignSpeeds();
 	void update();
 
@@ -49,6 +62,8 @@ public:
 	float getCellDirSpeed(Group *group, glm::vec2 cell_pos);
 
 	void assignPeopleVels();
+	
+	float calcContribution(float dist, float tot_dist);
 	
 };
 

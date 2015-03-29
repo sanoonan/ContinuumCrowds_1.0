@@ -34,10 +34,17 @@ class DensityField
 {
 public:
 
+	float m_density_expo;
+
 	SharedGrid *m_grid;
 	PopulationManager *popManager;
+
+	float m_min_density, m_max_density;
 	
 	DensityField();
+	
+
+	void assignMinMax(float min, float max);
 
 	void assignDensities();
 	void clearDensities();

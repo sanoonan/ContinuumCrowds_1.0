@@ -55,42 +55,66 @@ void SpeedField :: assignTopoSpeeds()
 void SpeedField :: assignSpeeds()
 {
 	Group *curr_group;
-	GroupGrid *curr_grid;
-	GroupCell *curr_group_cell;
 	glm::vec2 cell_pos;
-	GroupCellFace *cellface;
-
-	float topo_speed, flow_speed, speed;
-	
 
 
 	int width = shared_grid->m_width;
 	int height = shared_grid->m_height;
 
 	int num_groups = popManager->m_num_groups;
-	for(int i=0; i<num_groups; i++)
-	{
-		curr_group = popManager->m_groups[i];
-		curr_grid = &curr_group->m_grid;
 
-		for(int j=0; j<width; j++)
-			for(int k=0; k<height; k++)
+	int i, j, k;
+
+	for(i=0; i<num_groups; ++i)
+	{
+		curr_group = popManager->m_groups[i];	
+
+		for(j=0; j<width; ++j)
+			for(k=0; k<height; ++k)
 			{
 				cell_pos = glm::vec2(j, k);
-				curr_group_cell = &curr_grid->findCellByPos(cell_pos);
 
-				getCellSpeeds(curr_group, cell_pos);
-				
+				getCellSpeeds(curr_group, cell_pos);	
 			}
 	}
 }
 
 
-float getTopoSpeed(float fmax, float fmin, float smax, float smin, glm::vec2 grad_height, glm::vec2 offset)
+float SpeedField :: getTopoSpeed(float fmax, float fmin, float smax, float smin, glm::vec2 grad_height, glm::vec2 offset)
 {
 	float h_dot_n = glm::dot(grad_height, offset);
-	float topo_speed = fmax + ((h_dot_n - smin) / (smax - smin)) * (fmin - fmax);
+
+	float diff_slope = smax - smin;
+	if(diff_slope == 0)
+		return fmax;
+
+	float topo_speed = fmax + ((h_dot_n - smin) / (diff_slope)) * (fmin - fmax);
+	topo_speed = max(topo_speed, 0.0f);
 	return topo_speed;
+}
+
+float SpeedField :: getFlowSpeed(glm::vec2 avg_vel, glm::vec2 offset)
+{
+	float flow_speed = glm::dot(avg_vel, offset);
+	flow_speed = max(flow_speed, 0.0f);
+	return flow_speed;
+}
+
+float SpeedField :: getFlowSpeedCell(glm::vec2 cell_pos, glm::vec2 offset)
+{
+	glm::vec2 offset_pos = cell_pos + offset;
+
+	glm::vec2 offset_cell_pos = shared_grid->findClosestCellPos(offset_pos);
+
+	if(!shared_grid->checkExists(offset_cell_pos))
+		return 0.0f;
+
+	SharedCell *offset_cell = &shared_grid->findCellByPos(offset_cell_pos);
+
+	glm::vec2 avg_vel = offset_cell->m_avg_velocity;
+
+
+	return getFlowSpeed(avg_vel, offset);
 }
 
 void SpeedField :: getCellSpeeds(Group *group, glm::vec2 cell_pos)
@@ -110,17 +134,27 @@ void SpeedField :: getCellSpeeds(Group *group, glm::vec2 cell_pos)
 	float min_slope = shared_grid->min_slope;
 
 	glm::vec2 offset;
-	float topo_speed, speed;
+	float topo_speed, flow_speed, speed;
 
 	GroupCellFace *face;
 
-	for(int i=0; i<4; i++)
+	int i;
+
+	for(i=0; i<4; ++i)
 	{
 		face = &cell->m_faces[i];
 		offset = face->m_offset;
 
 		topo_speed = getTopoSpeed(max_speed, min_speed, max_slope, min_slope, height_vector, offset);
-		speed = topo_speed;
+		flow_speed = getFlowSpeedCell(cell_pos, offset);
+
+
+
+//		speed = topo_speed;
+		speed = interpolateSpeedCell(cell_pos, offset, topo_speed, flow_speed);
+
+
+
 		face->m_speed = speed;
 
 		if(i>1)
@@ -154,8 +188,10 @@ float SpeedField :: getCellDirSpeed(Group *group, glm::vec2 cell_pos)
 	glm::vec2 offset = cell->m_tot_grad_potential;
 
 	float topo_speed = getTopoSpeed(max_speed, min_speed, max_slope, min_slope, height_vector, offset);
+	float flow_speed = getFlowSpeedCell(cell_pos, offset);
+
 	
-	float speed = topo_speed;
+	float speed = interpolateSpeedCell(cell_pos, offset, topo_speed, flow_speed);
 
 	return speed;
 }
@@ -186,10 +222,10 @@ void SpeedField :: assignDirSpeeds()
 				cell_pos = glm::vec2(j, k);
 				curr_group_cell = &curr_grid->findCellByPos(cell_pos);
 
-				speed = getCellDirSpeed(curr_group, cell_pos);
-				speed = -0.5f;
+				speed = -getCellDirSpeed(curr_group, cell_pos);
+			//	speed = -0.5f;
 				tot_grad_potential = curr_group_cell->m_tot_grad_potential;
-
+				
 				velocity = speed * tot_grad_potential;
 
 				curr_group_cell->m_velocity = velocity;
@@ -219,8 +255,17 @@ void SpeedField :: assignPeopleVels()
 	Group *curr_group;
 	GroupGrid *grid;
 
-	float min_dist;
-	float dist;
+
+	float cellAdist, cellBdist, cellCdist, cellDdist;
+	float cellAcontrib, cellBcontrib, cellCcontrib, cellDcontrib;
+
+	glm::vec2 cellAvel, cellBvel, cellCvel, cellDvel;
+
+	float total_dist;
+
+	glm::vec2 velocity;
+
+	int num_existing_cells;
 
 	for(int i=0; i<num_groups; i++)
 	{
@@ -231,8 +276,10 @@ void SpeedField :: assignPeopleVels()
 
 		for(int j=0; j<num_people; j++)
 		{
-			min_dist = 9999999;
-
+			num_existing_cells = 0;
+			total_dist = 0.0f;
+			cellAdist = cellBdist = cellCdist = cellDdist = -1.0f;
+			cellAvel = cellBvel = cellCvel = cellDvel = glm::vec2(0.0f);
 
 			left = bot = top = right = false;
 
@@ -248,48 +295,124 @@ void SpeedField :: assignPeopleVels()
 
 			if(shared_grid->checkExists(cellApos))
 			{
-				dist = glm::distance(cellApos, person_pos);
-				if(dist < min_dist)
-				{
-					min_dist = dist;
-					cell = &grid->findCellByPos(cellApos);
-				}
+				cellAdist = glm::distance(cellApos, person_pos);
+				
+				cell = &grid->findCellByPos(cellApos);
+				cellAvel = cell->m_velocity;
+				
+				total_dist += cellAdist;
+
+				num_existing_cells++;
 			}
 
 			if(shared_grid->checkExists(cellBpos))
 			{
-				dist = glm::distance(cellBpos, person_pos);
-				if(dist < min_dist)
-				{
-					min_dist = dist;
-					cell = &grid->findCellByPos(cellBpos);
-				}
+				cellBdist = glm::distance(cellBpos, person_pos);
+				
+				cell = &grid->findCellByPos(cellBpos);
+				cellBvel = cell->m_velocity;
+
+				total_dist += cellBdist;
+
+				num_existing_cells++;
 			}
 
 			if(shared_grid->checkExists(cellCpos))
 			{
-				dist = glm::distance(cellCpos, person_pos);
-				if(dist < min_dist)
-				{
-					min_dist = dist;
-					cell = &grid->findCellByPos(cellCpos);
-				}
+				cellCdist = glm::distance(cellCpos, person_pos);
+				
+				cell = &grid->findCellByPos(cellCpos);
+				cellCvel = cell->m_velocity;
+
+				total_dist += cellCdist;
+
+				num_existing_cells++;
 			}
 
 			if(shared_grid->checkExists(cellDpos))
 			{
-				dist = glm::distance(cellDpos, person_pos);
-				if(dist < min_dist)
-				{
-					min_dist = dist;
-					cell = &grid->findCellByPos(cellDpos);
-				}
+				cellDdist = glm::distance(cellDpos, person_pos);
+	
+				cell = &grid->findCellByPos(cellDpos);
+				cellDvel = cell->m_velocity;
+
+				total_dist += cellDdist;
+
+				num_existing_cells++;
 			}
 
-			curr_person->m_velocity = cell->m_velocity;
+			if(num_existing_cells == 1)
+				cellAcontrib = cellBcontrib = cellCcontrib = cellDcontrib = 1.0f;
+			else
+			{
+				cellAcontrib = calcContribution(cellAdist, total_dist);
+				cellBcontrib = calcContribution(cellBdist, total_dist);
+				cellCcontrib = calcContribution(cellCdist, total_dist);
+				cellDcontrib = calcContribution(cellDdist, total_dist);
+			}
 
-
+			velocity = cellAcontrib * cellAvel + cellBcontrib * cellBvel + cellCcontrib * cellCvel + cellDcontrib * cellDvel;
+		//	if(glm::length(velocity) != 0)
+		//		velocity = glm::normalize(velocity);
+			curr_person->m_velocity = velocity;
 		}
 	}		
 	
+}
+
+
+float SpeedField :: calcContribution(float dist, float tot_dist)
+{
+	if(dist < 0.0f)
+		return 0.0f;
+
+	float rest_dist = tot_dist - dist;
+	float contrib = rest_dist/tot_dist;
+
+	return contrib;
+}
+
+
+
+float SpeedField :: interpolateSpeed(float ft, float fv, float p, float pmin, float pmax)
+{
+	float p_diff = pmax - pmin;
+
+	if(p_diff == 0)
+		return ft;
+
+	if(p > pmax)
+		return fv;
+
+	if(p < pmin)
+		return ft;
+
+	float speed = ft + ((p - pmin)/p_diff) * (fv - ft);
+	return speed;
+}
+
+
+float SpeedField :: interpolateSpeedCell(glm::vec2 cell_pos, glm::vec2 offset, float topo_speed, float flow_speed)
+{
+	glm::vec2 offset_pos = cell_pos + offset;
+
+	glm::vec2 offset_cell_pos = shared_grid->findClosestCellPos(offset_pos);
+
+	if(!shared_grid->checkExists(offset_cell_pos))
+		return 0.0f;
+
+	SharedCell *offset_cell = &shared_grid->findCellByPos(offset_cell_pos);
+
+	float density = offset_cell->m_density;
+	
+
+	return interpolateSpeed(topo_speed, flow_speed, density, *min_density, *max_density);
+}
+
+void SpeedField :: assignDensityField(DensityField *df)
+{
+	densityField = df;
+
+	min_density = &df->m_min_density;
+	max_density = &df->m_max_density;
 }

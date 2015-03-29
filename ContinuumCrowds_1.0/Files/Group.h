@@ -42,6 +42,8 @@ public:
 
 	float max_speed, min_speed;
 
+	glm::vec3 m_colour;
+
 	std::vector<glm::vec2> m_goal;
 	std::vector<Person> m_people;
 
@@ -49,12 +51,34 @@ public:
 
 	Group();
 	Group(int num_people);
+	Group(int num_people, glm::vec3 colour);
 
 	void draw(float scale, GLuint spID);
 
+
+
 	void setRightSideGoal();
+	void setLeftSideGoal();
+
+	void setBottomRightCornerGoal();
+	void setBottomLeftCornerGoal();
+	void setTopRightCornerGoal();
+	void setTopLeftCornerGoal();
+
 	void setupGrid(SharedGrid &shared_grid);
+
+
+
+
 	void assignRandomLocs();
+
+	void assignRandomLeftLoc();
+	void assignRandomRightLoc();
+
+	void assignRandomTopLeftLoc();
+	void assignRandomTopRightLoc();
+	void assignRandomBottomLeftLoc();
+	void assignRandomBottomRightLoc();
 
 	void addTBar(TwBar *bar);
 

@@ -114,47 +114,92 @@ void PotentialField :: getGroupPotential(Group *group)
 
 	GroupGrid *grid = &group->m_grid;
 
+	int grid_width = grid->m_width;
+	int grid_height = grid->m_height;
+
 	std::vector<GroupCell*> known, candidate;
-	int num_known;
+
 	int num_candidate = 0;
 
 	std::vector<glm::vec2> *goal = &group->m_goal;
-	num_known = goal->size();
+	int num_known = goal->size();
+
 	known.resize(num_known);
+
+	std::vector<std::vector<bool>> isKnown(grid_width);
+	for(int i=0; i<grid_width; i++)
+	{
+		isKnown[i].resize(grid_height);
+		
+		for(int j=0; j<grid_height; j++)
+			isKnown[i][j] = false;
+	}
+
+	
+	std::vector<std::vector<bool>> isCandidate = isKnown;
+
+	int posx, posy;
+
 	for(int i=0; i<num_known; i++)
 	{
 		known[i] = &grid->findCellByPos((*goal)[i]);
 		known[i]->m_potential = 0.0f;
+
+		posx = (*goal)[i].x;
+		posy = (*goal)[i].y;
+
+		isKnown[posx][posy] = true;
 	}
 
 	int tot_num_cells = grid->m_height * grid->m_width;
 	
-	std::vector<glm::vec2> neighbours;
-	GroupCell *candidate_cell;
+	glm::vec2 neighbours_pos[4];
+	glm::vec2 curr_neighbour_pos;
+	GroupCell *candidate_cell, *curr_known;;
 	int best_candidate_num;
+	float temp_potential;
 
+	
+
+	
+
+
+	
 
 	while(num_known < tot_num_cells)
 	{
 		for(int i=0; i<num_known; i++)
 		{
-			neighbours = grid->getNeighbours(known[i]->m_position);
+			curr_known = known[i];
+			grid->getNeighbours(curr_known->m_position, neighbours_pos);
 			for(int j=0; j<4; j++)
-				if(grid->checkExists(neighbours[j]))
+			{
+				curr_neighbour_pos = neighbours_pos[j];
+				if(grid->checkExists(curr_neighbour_pos))
 				{
-					if(!checkForCellByPos(known, neighbours[j]))
-						if(!checkForCellByPos(candidate, neighbours[j]))
+					posx = curr_neighbour_pos.x;
+					posy = curr_neighbour_pos.y;
+
+//					if(!checkForCellByPos(known, curr_neighbour_pos))
+					if(!isKnown[posx][posy])
+//						if(!checkForCellByPos(candidate, curr_neighbour_pos))
+						if(!isCandidate[posx][posy])
 						{
-							candidate_cell = &grid->findCellByPos(neighbours[j]);
+							candidate_cell = &grid->findCellByPos(curr_neighbour_pos);
 							candidate.push_back(candidate_cell);
+
+							isCandidate[curr_neighbour_pos.x][curr_neighbour_pos.y] = true;
+
 							num_candidate++;
 						}
 				}
+			}
 		}
 
 		for(int i=0; i<num_candidate; i++)
 		{
-			candidate[i]->m_temp_potential = getCellPotential(candidate[i], grid);
+			temp_potential = getCellPotential(candidate[i], grid);
+			candidate[i]->m_temp_potential = temp_potential;
 		}
 
 		best_candidate_num = checkForLowestTempPotential(candidate);
@@ -164,9 +209,16 @@ void PotentialField :: getGroupPotential(Group *group)
 		num_candidate--;
 
 		known.push_back(candidate_cell);
-		num_known++;
-	}
 
+		glm::vec2 cand_pos = candidate_cell->m_position;
+
+		isKnown[cand_pos.x][cand_pos.y] = true;
+		isCandidate[cand_pos.x][cand_pos.y] = false;
+
+		num_known++;
+
+
+	}
 
 }
 
@@ -180,7 +232,8 @@ float PotentialField :: getCellPotential(GroupCell *cell, GroupGrid *grid)
 	nox = noy = false;
 
 	glm::vec2 cell_pos = cell->m_position;
-	std::vector<glm::vec2> faces = grid->getNeighbours(cell_pos);
+	glm::vec2 faces[4];
+	grid->getNeighbours(cell_pos, faces);
 
 	glm::vec2 mx_pos, my_pos;
 
@@ -193,7 +246,13 @@ float PotentialField :: getCellPotential(GroupCell *cell, GroupGrid *grid)
 
 
 	if(!nox)
+	{
+		if(!noy)
+			return 0.0f;
+
+
 		final_potential = getFiniteDifference(grid, cell, my_pos);
+	}
 	else if(!noy)
 		final_potential = getFiniteDifference(grid, cell, mx_pos);
 	else
@@ -214,7 +273,12 @@ float PotentialField :: getFiniteDifference(GroupGrid *grid, GroupCell *cell, gl
 	cost = face_m.m_cost;
 	potential = m.m_potential;
 
-	return (cost * cost) + potential;
+	float arg1 = potential + cost;
+	float arg2 = potential - cost;
+
+//	return (cost * cost) + potential;
+
+	return max(arg1, arg2);
 }
 
 float PotentialField :: getFiniteDifference(GroupGrid *grid, GroupCell *cell, glm::vec2 neigh_pos_x, glm::vec2 neigh_pos_y)
@@ -248,17 +312,20 @@ float PotentialField :: getFiniteDifference(GroupGrid *grid, GroupCell *cell, gl
 
 	if(under_sqrt >= 0)
 	{
-		float const_part = (-b)/(2 * a);
+		float const_part = -b;
 
-		float change_part = (sqrt(under_sqrt)/(2 * a));
+		float change_part = sqrt(under_sqrt);
 
-		float arg1 = const_part + change_part;
-		float arg2 = const_part - change_part;
+		float mul_part = 1/(2*a);
+
+		float arg1 = (const_part + change_part)*mul_part;
+		float arg2 = (const_part - change_part)*mul_part;
 
 		float potential = max(arg1, arg2);
 
-	//	if((potential >= potentialx)&&(potential >= potentialy))
+		if((potential >= potentialx)&&(potential >= potentialy))
 			return potential;
+		
 
 	}
 
@@ -279,7 +346,7 @@ void PotentialField :: setGroupPotentialGrads(Group *group)
 	GroupCell *curr_cell;
 	GroupCellFace *curr_face;
 	bool left, right, top, bot;
-	std::vector<glm::vec2> neighbours;
+	glm::vec2 neighbours[4];
 	GroupCell *neighbour_cell;
 	glm::vec2 cell_pos;
 	float pot_grad, curr_pot, neighbour_pot;
@@ -297,7 +364,7 @@ void PotentialField :: setGroupPotentialGrads(Group *group)
 			curr_cell = &grid->m_cells[i][j];
 			cell_pos = glm::vec2(i, j); 
 			curr_pot = curr_cell->m_potential;
-			neighbours = grid->getNeighbours(cell_pos);
+			grid->getNeighbours(cell_pos, neighbours);
 			for(int k=0; k<4; k++)
 			{
 				curr_face = &curr_cell->m_faces[k];

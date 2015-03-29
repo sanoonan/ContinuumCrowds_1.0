@@ -1,5 +1,31 @@
-﻿Build started 14/03/2015 16:34:14.
+﻿Build started 29/03/2015 12:26:22.
+     1>Project "C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\ContinuumCrowds_1.0.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glew-1.10.0\include" /I"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\freeglut\include" /I"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\assimp\include" /I"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\AntTweakBar\AntTweakBar\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Files\DensityField.cpp Files\SpeedField.cpp
+         DensityField.cpp
+         SpeedField.cpp
+     1>Files\SpeedField.cpp(205): warning C4101: 'cellface' : unreferenced local variable
+     1>Files\SpeedField.cpp(248): warning C4101: 'deltaY' : unreferenced local variable
+     1>Files\SpeedField.cpp(248): warning C4101: 'deltaX' : unreferenced local variable
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\VS Projects\ContinuumCrowds_1.0\Release\ContinuumCrowds_1.0.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\glew-1.10.0\lib\Release\Win32" /LIBPATH:"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\freeglut\lib" /LIBPATH:"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\assimp\lib\Release" /LIBPATH:"C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\AntTweakBar\AntTweakBar\lib" assimp.lib freeglut.lib glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\VS Projects\ContinuumCrowds_1.0\Release\ContinuumCrowds_1.0.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\VS Projects\ContinuumCrowds_1.0\Release\ContinuumCrowds_1.0.lib" /MACHINE:X86 /SAFESEH Release\Camera.obj
+         Release\Cell.obj
+         Release\CellFace.obj
+         Release\DensityField.obj
+         Release\Grid.obj
+         Release\Group.obj
+         Release\main.obj
+         Release\Person.obj
+         Release\PopulationManager.obj
+         Release\PotentialField.obj
+         Release\Shaders.obj
+         Release\SpeedField.obj
+         Generating code
+     1>c:\vs projects\continuumcrowds_1.0\continuumcrowds_1.0\files\cell.cpp(116): warning C4715: 'GroupCell::getFaceByNeighbour' : not all control paths return a value
+         Finished generating code
+         ContinuumCrowds_1.0.vcxproj -> C:\VS Projects\ContinuumCrowds_1.0\Release\ContinuumCrowds_1.0.exe
+     1>Done Building Project "C:\VS Projects\ContinuumCrowds_1.0\ContinuumCrowds_1.0\ContinuumCrowds_1.0.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.03
+Time Elapsed 00:00:03.37
