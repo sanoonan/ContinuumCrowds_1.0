@@ -54,8 +54,11 @@ public:
 	float getFiniteDifference(GroupGrid *grid, GroupCell *cell, glm::vec2 neigh_pos);
 	float getFiniteDifference(GroupGrid *grid, GroupCell *cell, glm::vec2 neigh_pos_x, glm::vec2 neigh_pos_y);
 
+	int checkForLowestTempPotential(std::vector<GroupCell*> &group_cells);
 	
 	void setGroupPotentialGrads(Group *group);
+
+	void normaliseCellPotetialGrads(GroupCell *cell);
 
 	bool getArgMin(GroupGrid *grid, GroupCell curr_cell, glm::vec2 cell1pos, glm::vec2 cell2pos, glm::vec2 &min_cell_pos);
 

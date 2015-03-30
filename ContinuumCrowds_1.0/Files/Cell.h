@@ -57,7 +57,8 @@ public:
 
 	float m_density, m_height;
 	glm::vec2 m_avg_velocity;
-	glm::vec2 m_tot_grad_height;
+	float m_discomfort;
+
 
 	SharedCellFace m_faces[4];
 
@@ -65,6 +66,7 @@ public:
 
 	void drawDensities(float scale, GLuint spID);
 	void drawHeights(float scale, GLuint spID);
+	void drawDiscomfort(float scale, GLuint spID);
 
 	void setFaces();
 };
@@ -73,12 +75,10 @@ class GroupCell : public Cell
 {
 public:
 
-	float m_discomfort, m_potential;
+	float m_potential;
 	float m_temp_potential;
 
-	glm::vec2 m_tot_grad_potential;
-	glm::vec2 m_tot_speed;
-	glm::vec2 m_velocity;
+	glm::vec2 m_tot_velocity;
 
 
 	GroupCellFace m_faces[4];
@@ -90,7 +90,7 @@ public:
 	GroupCellFace getFaceByNeighbour(glm::vec2 neighbour_pos);
 
 	void drawPotentials(float scale, GLuint spID);
-	void drawTeapots(float scale, GLuint spID);
+
 
 	void unTempPotential();
 };

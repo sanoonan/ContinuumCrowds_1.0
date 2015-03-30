@@ -78,11 +78,13 @@ public:
 
 	void drawDensities(float scale, GLuint spIDlin, GLuint spIDdensity);
 	void drawHeights(float scale, GLuint spIDlin, GLuint spIDheight);
-
+	void drawDiscomfort(float scale, GLuint spIDlin, GLuint spIDdiscomfort);
 
 	void assignRandomHeights(int max_height);
 	void makeMiddleMountain(int max_height, float radius);
 	void setHeightGrads();
+
+	void assignDiscomfortToBottom(float dis);
 
 	void checkMinMaxSlopes(float value);
 
@@ -100,13 +102,13 @@ public:
 
 	void setupGridCells();
 	GroupCell &findCellByPos(glm::vec2 pos);
-//	void setupGridCells(int width, int height);
+
 
 	void copyGridSize(SharedGrid &grid);
 
 	void drawPotentials(float scale, GLuint spIDline, GLuint spIDpotential);
 
-	void drawTeapots(float scale, GLuint spID);
+
 
 };
 

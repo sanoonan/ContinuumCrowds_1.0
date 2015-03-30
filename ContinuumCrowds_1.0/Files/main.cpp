@@ -65,11 +65,13 @@ Shaders line_shader("Line", VS_LINE, FS_LINE);
 Shaders density_shader("Density", VS_MINMAX, FS_MINMAX);
 Shaders height_shader("Height", VS_MINMAX, FS_MINMAX);
 Shaders potential_shader("Potential", VS_MINMAX, FS_MINMAX);
+Shaders discomfort_shader("Discomfort", VS_MINMAX, FS_MINMAX);
+
 
 PopulationManager popManager;
 
 //VORTEX SCENARTIO
-SharedGrid mainGrid(20, 20);
+SharedGrid mainGrid(32, 32);
 Group groupA(10, glm::vec3(1.0f, 0.5f, 0.0f));
 Group groupB(10, glm::vec3(0.0f, 1.0f, 1.0f));
 Group groupC(10, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -88,9 +90,8 @@ float draw_scale = 0.7f;
 bool draw_densities = false;
 bool draw_heights = true;
 bool draw_potentials = false;
+bool draw_discomfort = false;
 
-bool draw_teapots = false;
-bool are_moving = true;
 
 #pragma region DENSITY SHADER STUFF
 float min_density, max_density;
@@ -189,19 +190,41 @@ void initPotentialShaderValues()
 
 #pragma endregion
 
+#pragma region DISCOMFORT SHADER STUFF
 
-void debugPotentials()
+float min_discomfort, max_discomfort;
+glm::vec3 max_disc_col, min_disc_col;
+
+void updateDiscomfortShaderValues()
 {
-	float potentials[4][4];
+	glUseProgram(discomfort_shader.id);
 
-	for(int i=0; i<4; i++)
-		for(int j=0; j<4; j++)
-		{
-			potentials[j][i] = groupA.m_grid.m_cells[i][j].m_potential;
-		}
+	int max_col_location = glGetUniformLocation (discomfort_shader.id, "max_colour");
+	int min_col_location = glGetUniformLocation (discomfort_shader.id, "min_colour");
+	glUniform3fv (max_col_location, 1,  glm::value_ptr(max_disc_col));
+	glUniform3fv (min_col_location, 1,  glm::value_ptr(min_disc_col));
 
-	cout << "lol";
+	int max_disc_loc = glGetUniformLocation (discomfort_shader.id, "max_value");
+	int min_disc_loc = glGetUniformLocation (discomfort_shader.id, "min_value");
+	glUniform1f (max_disc_loc, max_discomfort);
+	glUniform1f (min_disc_loc, min_discomfort);
 }
+
+void initDiscomfortShaderValues()
+{
+	max_discomfort = 5.0f;
+	min_discomfort = 0.0f;
+
+	max_disc_col = glm::vec3(1.0f, 1.0f, 1.0f);
+	min_disc_col = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	updateDiscomfortShaderValues();
+}
+
+#pragma endregion
+
+
+
 
 #pragma region TWEAK BAR STUFF
 
@@ -221,6 +244,7 @@ void TW_CALL drawDensity(void *)
 	draw_densities = true;
 	draw_heights = false;
 	draw_potentials = false;
+	draw_discomfort = false;
 }
 
 
@@ -230,6 +254,7 @@ void TW_CALL drawHeight(void *)
 	draw_densities = false;
 	draw_heights = true;
 	draw_potentials = false;
+	draw_discomfort = false;
 }
 
 
@@ -238,6 +263,15 @@ void TW_CALL drawPotential(void *)
 	draw_densities = false;
 	draw_heights = false;
 	draw_potentials = true;
+	draw_discomfort = false;
+}
+
+void TW_CALL drawDiscomfort(void *)
+{
+	draw_densities = false;
+	draw_heights = false;
+	draw_potentials = false;
+	draw_discomfort = true;
 }
 
 
@@ -259,12 +293,14 @@ void init_tweak()
 	TwAddVarRO(bar, "FPS", TW_TYPE_FLOAT, &fps, "");
 	TwAddVarRW(bar, "Scale", TW_TYPE_FLOAT, &draw_scale, "");
 
-	TwAddVarRW(bar, "Draw Direction?", TW_TYPE_BOOLCPP, &draw_teapots, "");
+//	TwAddVarRW(bar, "Draw Direction?", TW_TYPE_BOOLCPP, &draw_teapots, "");
 	TwAddButton(bar, "Reset", reset, NULL, "");
 //	TwAddVarRW(bar, "Run?", TW_TYPE_BOOLCPP, &are_moving, "");
 
 	
 	TwAddButton(bar, "Pause", pause, NULL, "");
+
+	
 
 	TwAddButton(bar, "Show Potentials", drawPotential, NULL, "");
 	TwAddVarRW(bar, "Max Potential", TW_TYPE_FLOAT, &max_potential, "");
@@ -278,10 +314,15 @@ void init_tweak()
 	TwAddVarRW(bar, "Min Density", TW_TYPE_FLOAT, &min_density, "");
 //	TwAddVarRW(bar, "Density Coefficient", TW_TYPE_FLOAT, &density_coeff, "");
 	TwAddButton(bar, "Show Heights", drawHeight, NULL, "");
-	TwAddVarRW(bar, "Max Height", TW_TYPE_FLOAT, &max_height, "");
-	TwAddVarRW(bar, "Min Height", TW_TYPE_FLOAT, &min_height, "");
+//	TwAddVarRW(bar, "Max Height", TW_TYPE_FLOAT, &max_height, "");
+//	TwAddVarRW(bar, "Min Height", TW_TYPE_FLOAT, &min_height, "");
 //	TwAddVarRW(bar, "Max Density Colour", TW_TYPE_COLOR3F, &max_density_col, "");
 //	TwAddVarRW(bar, "Min Denisty Colour", TW_TYPE_COLOR3F, &min_density_col, "");
+
+	camera.addTBar(bar);
+//	TwAddButton(bar, "Show Discomfort", drawDiscomfort, NULL, "");
+//	TwAddVarRW(bar, "Max Discomfort", TW_TYPE_FLOAT, &max_discomfort, "");
+//	TwAddVarRW(bar, "Min Discomfort", TW_TYPE_FLOAT, &min_discomfort, "");
 
 	popManager.addTBar(bar);
 
@@ -306,22 +347,24 @@ void init()
 	density_shader.CompileShaders();
 	height_shader.CompileShaders();
 	potential_shader.CompileShaders();
-
+	discomfort_shader.CompileShaders();
 	
 
 	initDensityShaderValues();
 	initHeightShaderValues();
 	initPotentialShaderValues();
+	initDiscomfortShaderValues();
 	
 	mainGrid.setupGridCells();
 //	mainGrid.assignRandomHeights(max_height);
-//	mainGrid.makeMiddleMountain(max_height, 0.5f);
+//	mainGrid.makeMiddleMountain(max_height, 0.4f);
+	mainGrid.assignDiscomfortToBottom(2.0f);
 
 	popManager.addGroup(groupA);
 	popManager.addGroup(groupB);
 
-	popManager.addGroup(groupC);
-	popManager.addGroup(groupD);
+//	popManager.addGroup(groupC);
+//	popManager.addGroup(groupD);
 
 
 
@@ -329,13 +372,15 @@ void init()
 	popManager.setupGroupGrids(mainGrid);
 //	popManager.assignRandomLocs();
 
-//	groupA.assignRandomLeftLoc();
-//	groupA.assignRandomBottomLeftLoc();
-	groupA.assignRandomTopLeftLoc();
+	
 
-//	groupB.assignRandomRightLoc();
+	groupA.assignRandomLeftLoc();
+//	groupA.assignRandomBottomLeftLoc();
+//	groupA.assignRandomTopLeftLoc();
+
+	groupB.assignRandomRightLoc();
 //	groupB.assignRandomTopRightLoc();
-	groupB.assignRandomBottomRightLoc();
+//	groupB.assignRandomBottomRightLoc();
 
 	groupC.assignRandomBottomLeftLoc();
 	groupD.assignRandomTopRightLoc();
@@ -344,8 +389,8 @@ void init()
 
 
 
-	groupA.setSpeeds(0.1f, 0.2f);
-	groupB.setSpeeds(0.1f, 0.2f);
+	groupA.setSpeeds(0.01f, 2.0f);
+	groupB.setSpeeds(0.01f, 2.0f);
 	groupC.setSpeeds(0.1f, 0.2f);
 	groupD.setSpeeds(0.1f, 0.2f);
 
@@ -353,11 +398,11 @@ void init()
 
 
 
-//	groupA.setRightSideGoal();
-	groupA.setBottomRightCornerGoal();
+	groupA.setRightSideGoal();
+//	groupA.setBottomRightCornerGoal();
 	
-//	groupB.setLeftSideGoal();
-	groupB.setTopLeftCornerGoal();
+	groupB.setLeftSideGoal();
+//	groupB.setTopLeftCornerGoal();
 
 
 	groupC.setTopRightCornerGoal();
@@ -415,11 +460,13 @@ void display()
 		mainGrid.drawDensities(draw_scale, line_shader.id, density_shader.id);
 	else if (draw_heights)
 		mainGrid.drawHeights(draw_scale, line_shader.id, height_shader.id);
+	else if (draw_discomfort)
+		mainGrid.drawDiscomfort(draw_scale, line_shader.id, discomfort_shader.id);
 	else if (draw_potentials)
 		groupA.m_grid.drawPotentials(draw_scale, line_shader.id, potential_shader.id);
+	
 
-	if(draw_teapots)
-		groupA.m_grid.drawTeapots(draw_scale, line_shader.id);
+
 
 	glUseProgram(line_shader.id);
 	glUniform3fv (colour_location, 1,  glm::value_ptr(glm::vec3(1.0f, 0.5f, 0.0f)));
@@ -481,6 +528,7 @@ void updateScene()
 	updateDensityShaderValues();
 	updateHeightShaderValues();
 	updatePotentialShaderValues();
+	updateDiscomfortShaderValues();
 
 
 	glutPostRedisplay();

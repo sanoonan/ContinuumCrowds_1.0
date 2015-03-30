@@ -34,8 +34,10 @@ glm::vec2 Cell :: getNeighbourPos(CellFace face)
 #pragma region SHARED
 SharedCell :: SharedCell() : Cell()
 {
-	m_density = m_height = 0.0f;
+	m_density = m_height = m_discomfort = 0.0f;
 	m_avg_velocity = glm::vec2(0.0f);
+
+
 }
 
 void SharedCell :: drawDensities(float scale, GLuint spID)
@@ -54,6 +56,16 @@ void SharedCell :: drawHeights(float scale, GLuint spID)
 
 	int height_location = glGetUniformLocation (spID, "value");
 	glUniform1f (height_location, m_height);
+
+	draw(scale, spID);
+}
+
+void SharedCell :: drawDiscomfort(float scale, GLuint spID)
+{
+	glUseProgram(spID);
+
+	int disc_loc = glGetUniformLocation (spID, "value");
+	glUniform1f (disc_loc, m_discomfort);
 
 	draw(scale, spID);
 }
@@ -84,7 +96,7 @@ void SharedCell :: setFaces()
 GroupCell :: GroupCell() : Cell()
 {
 	m_position = glm::vec2(0.0f);
-	m_discomfort = m_potential = 0.0f;
+	m_potential = 0.0f;
 }
 
 void GroupCell :: setFaces()
@@ -124,52 +136,6 @@ void GroupCell :: drawPotentials(float scale, GLuint spID)
 
 	draw(scale, spID);
 
-}
-
-void GroupCell :: drawTeapots(float scale,GLuint spID)
-{
-
-	glm::vec3 colour(1.0f, 0.0f, 0.0f);
-
-	glm::vec2 pot = m_tot_grad_potential;
-	pot = -pot;
-	if(pot != glm::vec2(0.0f))
-	{
-		float angle;
-
-		if(pot.x == 0.0f)
-			if(pot.y > 0.0f)
-				angle = 90.0f;
-			else
-				angle = 270.0f;
-		else if(pot.y == 0.0f)
-			if(pot.x > 0.0f)
-				angle = 0.0f;
-			else
-				angle = 180.0f;
-		else
-		{
-			colour = glm::vec3(0.0f);
-			angle = glm::atan(pot.y , pot.x);
-			angle = glm::degrees(angle);
-		}
-	
-
-		float size = 0.1f;
-
-		glUseProgram(spID);
-
-		glm::mat4 trans_mat = glm::translate(glm::mat4(), glm::vec3((m_position.x - grid_size.x/2)*scale, (m_position.y - grid_size.y/2)*scale, 0.08f));
-		glm::mat4 scale_mat = glm::scale(glm::mat4(), glm::vec3(size*scale, 1.2*size*scale, 0.001f));
-		glm::mat4 rot_mat = glm::rotate(glm::mat4(), angle, glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::mat4 model_mat = trans_mat * rot_mat * scale_mat;
-
-		int colour_location = glGetUniformLocation (spID, "colour");
-		glUniform3fv(colour_location, 1, glm::value_ptr(colour));
-		int matrix_location = glGetUniformLocation (spID, "model");
-		glUniformMatrix4fv(matrix_location, 1, GL_FALSE, glm::value_ptr(model_mat));
-		glutSolidTeapot(1.0f);
-	}
 }
 
 

@@ -28,7 +28,7 @@ SharedCellFace :: SharedCellFace() : CellFace()
 #pragma region GROUP
 GroupCellFace :: GroupCellFace() : CellFace()
 {
-	m_speed_topo = m_speed = m_cost = m_grad_potential = 0.0f;
+	m_speed = m_cost = m_grad_potential = 0.0f;
 	m_velocity = 0.0f;
 }
 #pragma endregion

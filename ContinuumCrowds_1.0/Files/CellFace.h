@@ -55,7 +55,7 @@ class GroupCellFace : public CellFace
 public:
 
 	float m_speed, m_cost;
-	float m_speed_topo;
+
 
 	float m_grad_potential;
 	float m_velocity;

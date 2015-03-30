@@ -46,9 +46,11 @@ public:
 
 	void assignDensityField(DensityField *df);
 
-	float getTopoSpeed(float fmax, float fmin, float smax, float smin, glm::vec2 grad_height, glm::vec2 offset);
-	float getFlowSpeed(glm::vec2 avg_vel, glm::vec2 offset);
-	float getFlowSpeedCell(glm::vec2 cell_pos, glm::vec2 offset);
+	float getTopoSpeed(float fmax, float fmin, float smax, float smin, float grad_height);
+
+
+
+	float getFlowSpeed(glm::vec2 cell_pos, glm::vec2 offset);
 
 	float interpolateSpeed(float ft, float fv, float p, float pmin, float pmax);
 	float interpolateSpeedCell(glm::vec2 cell_pos, glm::vec2 offset, float topo_speed, float flow_speed);
@@ -63,7 +65,8 @@ public:
 
 	void assignPeopleVels();
 	
-	float calcContribution(float dist, float tot_dist);
+	glm::vec2 interpolateBetweenTwo(float x, float x1, float x2, glm::vec2 f1, glm::vec2 f2);
+	glm::vec2 interpolateBetweenFour(float x, float y, float x1, float y1, float x2, float y2, glm::vec2 f11, glm::vec2 f12, glm::vec2 f21, glm::vec2 f22);
 	
 };
 

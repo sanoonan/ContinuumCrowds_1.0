@@ -4,7 +4,7 @@ using namespace std;
 
 DensityField :: DensityField()
 {
-	m_density_expo = 0.5f;
+	m_density_expo = 0.1f;
 }
 
 void DensityField :: clearDensities()
@@ -45,7 +45,7 @@ void DensityField :: assignDensities()
 		num_people = curr_group->m_num_people;
 		for(int j=0; j<num_people; j++)
 		{
-			left = bot = top = right = false;
+
 
 			curr_person = &curr_group->m_people[j];
 			person_pos = curr_person->m_position;

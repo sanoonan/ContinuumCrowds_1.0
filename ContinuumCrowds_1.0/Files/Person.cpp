@@ -12,12 +12,13 @@ Person :: Person()
 void Person :: draw(float grid_width, float grid_height, float scale, GLuint spID)
 {
 	glm::mat4 trans_mat = glm::translate(glm::mat4(), glm::vec3((m_position.x - grid_width/2)*scale, (m_position.y - grid_height/2)*scale, 0.1f));
-	glm::mat4 scale_mat = glm::scale(glm::mat4(), glm::vec3(scale, scale, 0.01f));
+//	glm::mat4 scale_mat = glm::scale(glm::mat4(), glm::vec3(scale, scale, 0.01f));
+	glm::mat4 scale_mat = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, 0.01f));
 	glm::mat4 model_mat = trans_mat * scale_mat;
 
 	int matrix_location = glGetUniformLocation (spID, "model");
 	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, glm::value_ptr(model_mat));
-	glutSolidSphere(0.1f, 5, 5);
+	glutSolidSphere(0.1f, 4, 4);
 }
 
 

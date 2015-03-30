@@ -143,6 +143,19 @@ SharedCell& SharedGrid :: findCellByPos(glm::vec2 pos)
 }
 
 
+void SharedGrid :: assignDiscomfortToBottom(float dis)
+{
+	int h = m_height/2;
+
+	int i, j;
+
+	for(i=0; i<m_width; ++i)
+		for(j=0; j<h; ++j)
+		{
+			m_cells[i][j].m_discomfort = dis;
+		}
+}
+
 
 
 void SharedGrid :: drawDensities(float scale, GLuint spIDline, GLuint spIDdensity)
@@ -163,6 +176,15 @@ void SharedGrid :: drawHeights(float scale, GLuint spIDline, GLuint spIDheight)
 			m_cells[i][j].drawHeights(scale, spIDheight);
 }
 
+void SharedGrid :: drawDiscomfort(float scale, GLuint spIDlin, GLuint spIDdiscomfort)
+{
+	drawOutline(scale, spIDlin);
+
+	for(int i=0; i<m_width; i++)
+		for(int j=0; j<m_height; j++)
+			m_cells[i][j].drawDiscomfort(scale, spIDdiscomfort);
+}
+
 void SharedGrid :: assignRandomHeights(int max_height)
 {
 	int h;
@@ -181,25 +203,24 @@ void SharedGrid :: setHeightGrads()
 	int curr_angle;
 	SharedCell *curr_cell;
 	SharedCellFace *curr_face;
-	bool left, right, top, bot;
+
 	glm::vec2 neighbours[4];
 	SharedCell *neighbour_cell;
 	glm::vec2 cell_pos;
 	float height_grad, curr_height, neighbour_height;
 
-	glm::vec2 tot_height_grad;
+	int i, j, k;
 
-	for(int i=0; i<m_width; i++)
-		for(int j=0; j<m_height; j++)
+	for(i=0; i<m_width; ++i)
+		for(j=0; j<m_height; ++j)
 		{
 			curr_cell = &m_cells[i][j];
 			cell_pos = glm::vec2(i, j); 
 			curr_height = curr_cell->m_height;
 			getNeighbours(cell_pos, neighbours);
 
-			tot_height_grad = glm::vec2(0.0f);
 
-			for(int k=0; k<4; k++)
+			for(k=0; k<4; ++k)
 			{
 				curr_face = &curr_cell->m_faces[k];
 				if(checkExists(neighbours[k]))
@@ -207,14 +228,6 @@ void SharedGrid :: setHeightGrads()
 					neighbour_cell = &findCellByPos(neighbours[k]);
 					neighbour_height = neighbour_cell->m_height;
 					height_grad = neighbour_height - curr_height;
-
-					if(k>1)
-						height_grad = -height_grad;
-
-					if(k%2 == 0)
-						tot_height_grad.x += height_grad;
-					else
-						tot_height_grad.y += height_grad;
 				}
 				else
 					height_grad = 0.0f;
@@ -223,10 +236,9 @@ void SharedGrid :: setHeightGrads()
 
 				curr_face = &curr_cell->m_faces[k];
 				curr_face->m_grad_height = height_grad;
-
 			}
 
-			curr_cell->m_tot_grad_height = tot_height_grad;
+		//	curr_cell->m_tot_grad_height = tot_height_grad;
 		}
 }
 
@@ -318,12 +330,6 @@ void GroupGrid :: drawPotentials(float scale, GLuint spIDline, GLuint spIDpotent
 			
 }
 
-void GroupGrid :: drawTeapots(float scale, GLuint spID)
-{
-	for(int i=0; i<m_width; i++)
-		for(int j=0; j<m_height; j++)
-			m_cells[i][j].drawTeapots(scale, spID);
-}
 
 
 #pragma endregion
